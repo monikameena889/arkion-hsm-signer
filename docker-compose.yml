@@ -1,0 +1,20 @@
+# docker compose up --build   (create the PIN first:  mkdir -p secrets && openssl rand -hex 16 > secrets/hsm_user_pin)
+services:
+  signer:
+    build: .
+    image: arkion-hsm-signer:latest
+    ports: ["8080:8080"]
+    environment:
+      HSM_PIN_FILE: /run/secrets/hsm_user_pin
+      HSM_POOL_SIZE: "8"
+    secrets: [hsm_user_pin]
+    volumes: [tokens:/var/lib/softhsm/tokens]
+    read_only: true
+    tmpfs: [/tmp]
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+secrets:
+  hsm_user_pin:
+    file: ./secrets/hsm_user_pin
+volumes:
+  tokens:
